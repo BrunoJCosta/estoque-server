@@ -1,0 +1,19 @@
+networks:
+  ms:
+    name: ms-network
+    driver: bridge
+    external: true
+
+services:
+  db:
+    container_name: db_estoque
+    image: postgres:14.0-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: estoque_server
+    ports:
+      - "5010:5432"
+    networks:
+      - ms

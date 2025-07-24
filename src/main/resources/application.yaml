@@ -22,6 +22,10 @@ spring:
     password: postgres
     enabled: true
 
+  sql:
+    init:
+      mode: always
+      encoding: utf-8
   jpa:
     database: postgresql
     hibernate:

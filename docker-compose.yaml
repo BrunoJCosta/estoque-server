@@ -17,3 +17,22 @@ services:
       - "5010:5432"
     networks:
       - ms
+  back_1:
+    build:
+      context: .
+    container_name: estoque_01
+    image: img_estoque_java
+    ports:
+      - "8200:8200"
+    expose:
+      - 8200
+    environment:
+      DATA_BASE: db_estoque
+      PORT_DB: 5432
+      PORT: 8200
+      HOST_EUREKA: eureka
+    networks:
+      - ms
+    depends_on:
+      db:
+        condition: service_started

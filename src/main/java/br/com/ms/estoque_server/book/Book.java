@@ -2,6 +2,7 @@ package br.com.ms.estoque_server.book;
 
 import br.com.ms.estoque_server.excecoes.QuantidadeAcimaDoLimite;
 import br.com.ms.estoque_server.excecoes.QuantidadeNaoEncontrada;
+import br.com.ms.estoque_server.template.Template;
 import br.com.ms.estoque_server.template.TemplateDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "book")
 @Getter
-class Book {
+class Book extends Template {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -41,7 +42,8 @@ class Book {
         this.quantidade += quantidade;
     }
 
-    protected TemplateDTO dto() {
+    @Override
+    public TemplateDTO dto() {
         return new TemplateDTO(referencia, quantidade);
     }
 

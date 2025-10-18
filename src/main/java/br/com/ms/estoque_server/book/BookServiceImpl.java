@@ -1,46 +1,37 @@
 package br.com.ms.estoque_server.book;
 
-import br.com.ms.estoque_server.excecoes.BookNaoEncontrado;
-import br.com.ms.estoque_server.excecoes.NaoEncontradaException;
-import br.com.ms.estoque_server.excecoes.QuantidadeAcimaDoLimite;
+import br.com.ms.estoque_server.excecoes.*;
+import br.com.ms.estoque_server.template.Template;
 import br.com.ms.estoque_server.template.TemplateDTO;
+import br.com.ms.estoque_server.template.TemplateRepository;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
 class BookServiceImpl implements BookService {
 
     private final BookRepository bookRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final static String LOOK_BOOK = "look:book:";
 
     @Override
-    public List<TemplateDTO> findAll() {
-        return bookRepository.findAll()
-                .stream()
-                .map(Book::dto)
-                .toList();
+    public TemplateRepository<Book> repository() {
+        return bookRepository;
     }
 
     @Override
-    public Optional<TemplateDTO> findById(Long id) {
-        return bookRepository.findById(id).map(Book::dto);
+    public Template newEntity() {
+        return new Book();
     }
 
     @Override
-    public Optional<TemplateDTO> findByReferencia(Long referenciaId) {
-        return bookRepository.findByReferencia(referenciaId).map(Book::dto);
-    }
-
-    @Override
-    public TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException {
-        form.validar("book");
-        Book book = new Book();
-        book.setReferencia(form.referencia());
-        book.setQuantidade(form.quantidade());
-        return bookRepository.saveAndFlush(book).dto();
+    public String tituloEntidade() {
+        return "book";
     }
 
     @Override

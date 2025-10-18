@@ -1,23 +1,44 @@
 package br.com.ms.estoque_server.template;
 
-import br.com.ms.estoque_server.excecoes.BookNaoEncontrado;
 import br.com.ms.estoque_server.excecoes.NaoEncontradaException;
 import br.com.ms.estoque_server.excecoes.QuantidadeAcimaDoLimite;
+import br.com.ms.estoque_server.excecoes.VendaSendoRealizadaException;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface TemplateService {
+public interface TemplateService<Entidade extends Template> {
 
-    List<TemplateDTO> findAll();
+    TemplateRepository<Entidade> repository();
 
-    Optional<TemplateDTO> findById(Long id);
+    Entidade newEntity();
 
-    Optional<TemplateDTO> findByReferencia(Long referencia) throws BookNaoEncontrado;
+    String tituloEntidade();
 
-    TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException;
+    default List<TemplateDTO> findAll() {
+        return repository().findAll()
+                .stream().map(Entidade::dto)
+                .toList();
+    }
 
-    TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite;
+    default Optional<TemplateDTO> findById(Long id) {
+        return repository().findById(id).map(Entidade::dto);
+    }
+
+    default Optional<TemplateDTO> findByReferencia(Long referencia) {
+        return repository().findByReferencia(referencia).map(Entidade::dto);
+    }
+
+    default TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException {
+        String titulo = this.tituloEntidade();
+        form.validar(titulo);
+        Entidade template = this.newEntity();
+        template.setReferencia(form.referencia());
+        template.setQuantidade(form.quantidade());
+        return repository().saveAndFlush(template).dto();
+    }
+
+    TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite, VendaSendoRealizadaException;
 
     TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException;
 }

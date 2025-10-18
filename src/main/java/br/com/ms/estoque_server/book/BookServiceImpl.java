@@ -35,12 +35,34 @@ class BookServiceImpl implements BookService {
     }
 
     @Override
-    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite {
+    @Retry(name = "venda")
+    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException,
+            QuantidadeAcimaDoLimite, VendaSendoRealizadaException {
+        String key = LOOK_BOOK + form.referencia();
+        String keyBook = redisTemplate.opsForValue().get(key);
+        if (keyBook != null)
+            throw new VendaSendoRealizadaException();
+        redisTemplate.opsForValue().setIfAbsent(key,"", Duration.ofSeconds(3));
+
         form.validar("book");
         Book book = bookRepository.findByReferencia(form.referencia())
-                .orElseThrow(BookNaoEncontrado::new);
-        book.venda(form.quantidade());
-        return bookRepository.saveAndFlush(book).dto();
+                .orElseThrow(() -> {
+                    redisTemplate.delete(key);
+                    return new BookNaoEncontrado();
+                });
+        realizarVenda(form, book, key);
+        Book save = bookRepository.saveAndFlush(book);
+        redisTemplate.delete(key);
+        return save.dto();
+    }
+
+    private void realizarVenda(TemplateDTO form, Book book, String key) throws QuantidadeAcimaDoLimite, QuantidadeNaoEncontrada {
+        try {
+            book.venda(form.quantidade());
+        } catch (Exception e) {
+            redisTemplate.delete(key);
+            throw e;
+        }
     }
 
     @Override

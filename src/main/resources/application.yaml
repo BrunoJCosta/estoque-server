@@ -6,6 +6,13 @@ eureka:
     serviceUrl:
       defaultZone: http://${HOST_EUREKA}:8761/eureka
 
+resilience4j:
+  retry:
+    instances:
+      venda:
+        max-attempts: 3
+        wait-duration: 5s
+
 spring:
   application:
     name: estoque-server

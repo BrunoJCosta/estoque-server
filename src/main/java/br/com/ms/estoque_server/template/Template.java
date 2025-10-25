@@ -5,13 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Template {
+public abstract class Template {
 
     private Long referencia;
 
     private Integer quantidade;
 
-    public TemplateDTO dto() {
+    public final TemplateDTO dto() {
         return new TemplateDTO(referencia, quantidade);
     }
 }

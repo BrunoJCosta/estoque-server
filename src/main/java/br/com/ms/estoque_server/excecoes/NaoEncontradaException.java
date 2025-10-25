@@ -1,6 +1,11 @@
 package br.com.ms.estoque_server.excecoes;
 
+import java.io.Serial;
+
 public class NaoEncontradaException extends Exception {
+
+    @Serial
+    private static final long serialVersionUID = -5465796240001514292L;
 
     public NaoEncontradaException(String tipo) {
         super(singularMasculino(tipo));

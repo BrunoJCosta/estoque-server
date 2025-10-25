@@ -11,32 +11,15 @@ public interface TemplateService<Entidade extends Template> {
 
     TemplateRepository<Entidade> repository();
 
-    Entidade newEntity();
-
     String tituloEntidade();
 
-    default List<TemplateDTO> findAll() {
-        return repository().findAll()
-                .stream().map(Entidade::dto)
-                .toList();
-    }
+    List<TemplateDTO> findAll();
 
-    default Optional<TemplateDTO> findById(Long id) {
-        return repository().findById(id).map(Entidade::dto);
-    }
+    Optional<TemplateDTO> findById(Long id);
 
-    default Optional<TemplateDTO> findByReferencia(Long referencia) {
-        return repository().findByReferencia(referencia).map(Entidade::dto);
-    }
+    Optional<TemplateDTO> findByReferencia(Long referencia);
 
-    default TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException {
-        String titulo = this.tituloEntidade();
-        form.validar(titulo);
-        Entidade template = this.newEntity();
-        template.setReferencia(form.referencia());
-        template.setQuantidade(form.quantidade());
-        return repository().saveAndFlush(template).dto();
-    }
+    TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException;
 
     TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite, VendaSendoRealizadaException;
 

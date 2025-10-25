@@ -10,28 +10,52 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 class BookServiceImpl implements BookService {
 
-    private final BookRepository bookRepository;
+    private final BookRepository repository;
     private final RedisTemplate<String, String> redisTemplate;
     private final static String LOOK_BOOK = "look:book:";
 
     @Override
     public TemplateRepository<Book> repository() {
-        return bookRepository;
-    }
-
-    @Override
-    public Template newEntity() {
-        return new Book();
+        return repository;
     }
 
     @Override
     public String tituloEntidade() {
         return "book";
+    }
+
+    @Override
+    public List<TemplateDTO> findAll() {
+            return repository.findAll()
+                    .stream().map(Book::dto)
+                    .toList();
+    }
+
+    @Override
+    public Optional<TemplateDTO> findById(Long id) {
+        return repository.findById(id).map(Book::dto);
+    }
+
+    @Override
+    public Optional<TemplateDTO> findByReferencia(Long referencia) {
+        return repository.findByReferencia(referencia).map(Book::dto);
+    }
+
+    @Override
+    public TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException {
+        String titulo = this.tituloEntidade();
+        form.validar(titulo);
+        Book template = new Book();
+        template.setReferencia(form.referencia());
+        template.setQuantidade(form.quantidade());
+        return repository.saveAndFlush(template).dto();
     }
 
     @Override
@@ -45,15 +69,24 @@ class BookServiceImpl implements BookService {
         redisTemplate.opsForValue().setIfAbsent(key,"", Duration.ofSeconds(3));
 
         form.validar("book");
-        Book book = bookRepository.findByReferencia(form.referencia())
+        Book book = repository.findByReferencia(form.referencia())
                 .orElseThrow(() -> {
                     redisTemplate.delete(key);
                     return new BookNaoEncontrado();
                 });
         realizarVenda(form, book, key);
-        Book save = bookRepository.saveAndFlush(book);
+        Book save = repository.saveAndFlush(book);
         redisTemplate.delete(key);
         return save.dto();
+    }
+
+    @Override
+    public TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException {
+        form.validar("book");
+        Book book = repository.findByReferencia(form.referencia())
+                .orElseThrow(BookNaoEncontrado::new);
+        book.compra(form.quantidade());
+        return repository.saveAndFlush(book).dto();
     }
 
     private void realizarVenda(TemplateDTO form, Book book, String key) throws QuantidadeAcimaDoLimite, QuantidadeNaoEncontrada {
@@ -63,15 +96,6 @@ class BookServiceImpl implements BookService {
             redisTemplate.delete(key);
             throw e;
         }
-    }
-
-    @Override
-    public TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException {
-        form.validar("book");
-        Book book = bookRepository.findByReferencia(form.referencia())
-                .orElseThrow(BookNaoEncontrado::new);
-        book.compra(form.quantidade());
-        return bookRepository.saveAndFlush(book).dto();
     }
 
 }

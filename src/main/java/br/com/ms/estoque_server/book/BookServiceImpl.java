@@ -1,11 +1,13 @@
 package br.com.ms.estoque_server.book;
 
+import br.com.ms.estoque_server.config.CacheName;
 import br.com.ms.estoque_server.excecoes.*;
-import br.com.ms.estoque_server.template.Template;
 import br.com.ms.estoque_server.template.TemplateDTO;
 import br.com.ms.estoque_server.template.TemplateRepository;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,22 +35,25 @@ class BookServiceImpl implements BookService {
 
     @Override
     public List<TemplateDTO> findAll() {
-            return repository.findAll()
-                    .stream().map(Book::dto)
-                    .toList();
+        return repository.findAll()
+                .stream().map(Book::dto)
+                .toList();
     }
 
     @Override
+    @Cacheable(value = CacheName.BOOK_ID, key = "#id")
     public Optional<TemplateDTO> findById(Long id) {
         return repository.findById(id).map(Book::dto);
     }
 
     @Override
+    @Cacheable(value = CacheName.BOOK_REFERENCIA, key = "#referencia")
     public Optional<TemplateDTO> findByReferencia(Long referencia) {
         return repository.findByReferencia(referencia).map(Book::dto);
     }
 
     @Override
+    @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
     public TemplateDTO criarNovo(TemplateDTO form) throws NaoEncontradaException {
         String titulo = this.tituloEntidade();
         form.validar(titulo);
@@ -60,13 +65,14 @@ class BookServiceImpl implements BookService {
 
     @Override
     @Retry(name = "venda")
+    @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
     public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException,
             QuantidadeAcimaDoLimite, VendaSendoRealizadaException {
         String key = LOOK_BOOK + form.referencia();
         String keyBook = redisTemplate.opsForValue().get(key);
         if (keyBook != null)
             throw new VendaSendoRealizadaException();
-        redisTemplate.opsForValue().setIfAbsent(key,"", Duration.ofSeconds(3));
+        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(3));
 
         form.validar("book");
         Book book = repository.findByReferencia(form.referencia())
@@ -81,6 +87,7 @@ class BookServiceImpl implements BookService {
     }
 
     @Override
+    @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
     public TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException {
         form.validar("book");
         Book book = repository.findByReferencia(form.referencia())

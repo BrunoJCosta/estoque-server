@@ -44,7 +44,7 @@ class Book extends Template {
 
     @Override
     public TemplateDTO dto() {
-        return new TemplateDTO(referencia, quantidade);
+        return new TemplateDTO(this.referencia, this.quantidade);
     }
 
 }

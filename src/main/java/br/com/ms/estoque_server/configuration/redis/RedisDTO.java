@@ -1,4 +1,4 @@
-package br.com.ms.estoque_server.config;
+package br.com.ms.estoque_server.configuration.redis;
 
 import java.time.Duration;
 

@@ -34,6 +34,7 @@ class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Cacheable(cacheNames = CacheName.BOOK_ALL)
     public List<TemplateDTO> findAll() {
         return repository.findAll()
                 .stream().map(Book::dto)
@@ -41,13 +42,13 @@ class BookServiceImpl implements BookService {
     }
 
     @Override
-    @Cacheable(value = CacheName.BOOK_ID, key = "#id")
+    @Cacheable(cacheNames = CacheName.BOOK_ID, key = "#id")
     public Optional<TemplateDTO> findById(Long id) {
         return repository.findById(id).map(Book::dto);
     }
 
     @Override
-    @Cacheable(value = CacheName.BOOK_REFERENCIA, key = "#referencia")
+    @Cacheable(cacheNames = CacheName.BOOK_REFERENCIA, key = "#referencia")
     public Optional<TemplateDTO> findByReferencia(Long referencia) {
         return repository.findByReferencia(referencia).map(Book::dto);
     }

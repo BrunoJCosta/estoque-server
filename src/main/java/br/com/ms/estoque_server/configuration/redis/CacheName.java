@@ -1,14 +1,13 @@
-package br.com.ms.estoque_server.config;
+package br.com.ms.estoque_server.configuration.redis;
 
 import java.time.Duration;
 import java.util.List;
 
 public class CacheName {
 
-    private static final String ESTOQUE = "estoque";
-    public static final String BOOK_ALL = ESTOQUE + "_book_all";
-    public static final String BOOK_ID = ESTOQUE + "_book_id";
-    public static final String BOOK_REFERENCIA = ESTOQUE + "_book_referencia";
+    public static final String BOOK_ALL = "estoque_book_all";
+    public static final String BOOK_ID = "estoque_book_id";
+    public static final String BOOK_REFERENCIA = "estoque_book_referencia";
 
     static List<RedisDTO> cache() {
         return List.of(

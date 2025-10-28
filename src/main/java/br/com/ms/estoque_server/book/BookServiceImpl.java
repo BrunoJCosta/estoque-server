@@ -1,6 +1,6 @@
 package br.com.ms.estoque_server.book;
 
-import br.com.ms.estoque_server.config.CacheName;
+import br.com.ms.estoque_server.configuration.redis.CacheName;
 import br.com.ms.estoque_server.excecoes.*;
 import br.com.ms.estoque_server.template.TemplateDTO;
 import br.com.ms.estoque_server.template.TemplateRepository;
@@ -21,7 +21,6 @@ class BookServiceImpl implements BookService {
 
     private final BookRepository repository;
     private final RedisTemplate<String, String> redisTemplate;
-    private final static String LOOK_BOOK = "look:book:";
 
     @Override
     public TemplateRepository<Book> repository() {
@@ -67,23 +66,20 @@ class BookServiceImpl implements BookService {
     @Override
     @Retry(name = "venda")
     @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
-    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException,
-            QuantidadeAcimaDoLimite, VendaSendoRealizadaException {
-        String key = LOOK_BOOK + form.referencia();
-        String keyBook = redisTemplate.opsForValue().get(key);
-        if (keyBook != null)
-            throw new VendaSendoRealizadaException();
-        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(3));
+    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException {
+//        String key = LOOK_BOOK + form.referencia();
+//        String keyBook = redisTemplate.opsForValue().get(key);
+//        if (keyBook != null)
+//            throw new VendaSendoRealizadaException();
+//        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(3));
 
         form.validar("book");
+        //                    redisTemplate.delete(key);
         Book book = repository.findByReferencia(form.referencia())
-                .orElseThrow(() -> {
-                    redisTemplate.delete(key);
-                    return new BookNaoEncontrado();
-                });
-        realizarVenda(form, book, key);
+                .orElseThrow(BookNaoEncontrado::new);
+//        realizarVenda(form, book, key);
         Book save = repository.saveAndFlush(book);
-        redisTemplate.delete(key);
+//        redisTemplate.delete(key);
         return save.dto();
     }
 

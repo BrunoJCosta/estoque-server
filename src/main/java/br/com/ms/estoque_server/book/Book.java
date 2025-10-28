@@ -3,16 +3,19 @@ package br.com.ms.estoque_server.book;
 import br.com.ms.estoque_server.excecoes.QuantidadeAcimaDoLimite;
 import br.com.ms.estoque_server.excecoes.QuantidadeNaoEncontrada;
 import br.com.ms.estoque_server.template.Template;
-import br.com.ms.estoque_server.template.TemplateDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+
 @Entity
-@Table(name = "book")
+@Table(name = "book", schema = "estoque")
 @Getter
 class Book extends Template {
 
+    @Serial
+    private static final long serialVersionUID = -4577370996102597469L;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "id", columnDefinition = "bigserial")

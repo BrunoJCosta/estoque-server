@@ -42,4 +42,13 @@ class Book extends Template {
         this.quantidade += quantidade;
     }
 
+    @Override
+    public Long templateReference() {
+        return this.referencia;
+    }
+
+    @Override
+    public Integer templateQuantidade() {
+        return this.quantidade;
+    }
 }

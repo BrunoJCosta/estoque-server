@@ -3,15 +3,21 @@ package br.com.ms.estoque_server.template;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public abstract class Template {
+import java.io.Serial;
+import java.io.Serializable;
 
-    private Long referencia;
+public abstract class Template implements Serializable {
 
-    private Integer quantidade;
+    @Serial
+    private static final long serialVersionUID = 6845463742916215768L;
+
+    public abstract Long templateReference();
+
+    public abstract Integer templateQuantidade();
 
     public final TemplateDTO dto() {
-        return new TemplateDTO(referencia, quantidade);
+        Long reference = this.templateReference();
+        Integer quantidade = this.templateQuantidade();
+        return new TemplateDTO(reference, quantidade);
     }
 }

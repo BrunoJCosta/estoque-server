@@ -8,10 +8,8 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +18,6 @@ import java.util.Optional;
 class BookServiceImpl implements BookService {
 
     private final BookRepository repository;
-    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public TemplateRepository<Book> repository() {
@@ -66,40 +63,22 @@ class BookServiceImpl implements BookService {
     @Override
     @Retry(name = "venda")
     @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
-    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException {
-//        String key = LOOK_BOOK + form.referencia();
-//        String keyBook = redisTemplate.opsForValue().get(key);
-//        if (keyBook != null)
-//            throw new VendaSendoRealizadaException();
-//        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(3));
-
+    public TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite {
         form.validar("book");
-        //                    redisTemplate.delete(key);
         Book book = repository.findByReferencia(form.referencia())
                 .orElseThrow(BookNaoEncontrado::new);
-//        realizarVenda(form, book, key);
-        Book save = repository.saveAndFlush(book);
-//        redisTemplate.delete(key);
-        return save.dto();
+        book.venda(form.quantidade());
+        return repository.saveAndFlush(book).dto();
     }
 
     @Override
     @CacheEvict(value = {CacheName.BOOK_ID, CacheName.BOOK_ALL, CacheName.BOOK_REFERENCIA}, allEntries = true)
-    public TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException {
+    public TemplateDTO reabastecer(TemplateDTO form) throws NaoEncontradaException {
         form.validar("book");
         Book book = repository.findByReferencia(form.referencia())
                 .orElseThrow(BookNaoEncontrado::new);
         book.compra(form.quantidade());
         return repository.saveAndFlush(book).dto();
-    }
-
-    private void realizarVenda(TemplateDTO form, Book book, String key) throws QuantidadeAcimaDoLimite, QuantidadeNaoEncontrada {
-        try {
-            book.venda(form.quantidade());
-        } catch (Exception e) {
-            redisTemplate.delete(key);
-            throw e;
-        }
     }
 
 }

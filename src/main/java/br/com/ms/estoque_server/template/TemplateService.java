@@ -23,5 +23,5 @@ public interface TemplateService<Entidade extends Template> {
 
     TemplateDTO registoVenda(TemplateDTO form) throws NaoEncontradaException, QuantidadeAcimaDoLimite, VendaSendoRealizadaException;
 
-    TemplateDTO compra(TemplateDTO form) throws NaoEncontradaException;
+    TemplateDTO reabastecer(TemplateDTO form) throws NaoEncontradaException;
 }

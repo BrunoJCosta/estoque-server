@@ -16,7 +16,6 @@ resilience4j:
 spring:
   application:
     name: estoque-server
-
   datasource:
     url: jdbc:postgresql://${DATA_BASE}:${PORT_DB}/estoque_server
     username: postgres
@@ -40,3 +39,5 @@ spring:
     show-sql: true
     open-in-view: false
 
+  cache:
+    type: redis

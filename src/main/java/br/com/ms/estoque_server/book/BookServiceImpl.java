@@ -8,6 +8,7 @@ import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Optional;
 class BookServiceImpl implements BookService {
 
     private final BookRepository repository;
+    private final Environment environment;
 
     @Override
     public TemplateRepository<Book> repository() {
@@ -32,21 +34,23 @@ class BookServiceImpl implements BookService {
     @Override
     @Cacheable(cacheNames = CacheName.BOOK_ALL)
     public List<TemplateDTO> findAll() {
+        String porta = getPorta();
         return repository.findAll()
-                .stream().map(Book::dto)
+                .stream().map(b -> b.dto(porta))
                 .toList();
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.BOOK_ID, key = "#id")
     public Optional<TemplateDTO> findById(Long id) {
-        return repository.findById(id).map(Book::dto);
+        String porta = getPorta();
+        return repository.findById(id).map(b -> b.dto(porta));
     }
 
     @Override
     @Cacheable(cacheNames = CacheName.BOOK_REFERENCIA, key = "#referencia")
     public Optional<TemplateDTO> findByReferencia(Long referencia) {
-        return repository.findByReferencia(referencia).map(Book::dto);
+        String porta = getPorta();
+        return repository.findByReferencia(referencia).map(b  -> b.dto(porta));
     }
 
     @Override
@@ -57,7 +61,8 @@ class BookServiceImpl implements BookService {
         Book template = new Book();
         template.setReferencia(form.referencia());
         template.setQuantidade(form.quantidade());
-        return repository.saveAndFlush(template).dto();
+        String porta = getPorta();
+        return repository.saveAndFlush(template).dto(porta);
     }
 
     @Override
@@ -68,7 +73,8 @@ class BookServiceImpl implements BookService {
         Book book = repository.findByReferencia(form.referencia())
                 .orElseThrow(BookNaoEncontrado::new);
         book.venda(form.quantidade());
-        return repository.saveAndFlush(book).dto();
+        String porta = getPorta();
+        return repository.saveAndFlush(book).dto(porta);
     }
 
     @Override
@@ -78,7 +84,11 @@ class BookServiceImpl implements BookService {
         Book book = repository.findByReferencia(form.referencia())
                 .orElseThrow(BookNaoEncontrado::new);
         book.compra(form.quantidade());
-        return repository.saveAndFlush(book).dto();
+        String porta = getPorta();
+        return repository.saveAndFlush(book).dto(porta);
     }
 
+    public String getPorta() {
+        return environment.getProperty("local.server.port");
+    }
 }

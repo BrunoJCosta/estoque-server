@@ -7,7 +7,7 @@ import br.com.ms.estoque_server.excecoes.ReferenciaNaoEncontrada;
 import java.io.Serializable;
 import java.util.Objects;
 
-public record TemplateDTO(Long referencia, Integer quantidade) implements Serializable {
+public record TemplateDTO(Long referencia, Integer quantidade, String environment) implements Serializable {
 
     public void validar(String tipo) throws NaoEncontradaException {
         this.validar(tipo, true);

@@ -15,9 +15,9 @@ public abstract class Template implements Serializable {
 
     public abstract Integer templateQuantidade();
 
-    public final TemplateDTO dto() {
+    public final TemplateDTO dto(String port) {
         Long reference = this.templateReference();
         Integer quantidade = this.templateQuantidade();
-        return new TemplateDTO(reference, quantidade);
+        return new TemplateDTO(reference, quantidade, port);
     }
 }

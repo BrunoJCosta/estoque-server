@@ -41,3 +41,8 @@ spring:
 
   cache:
     type: redis
+
+security:
+  jwt:
+    public-key: classpath:keys/public.pem
+    secret: ${SECRET}

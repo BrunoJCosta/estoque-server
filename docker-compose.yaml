@@ -17,6 +17,7 @@ services:
       - "5010:5432"
     networks:
       - ms
+
   back_1:
     build:
       context: .
@@ -31,6 +32,9 @@ services:
       PORT_DB: 5432
       PORT: 8200
       HOST_EUREKA: eureka
+      REDIS: redis
+      REDIS_PORT: 6379
+      SECRET: stock-ms-penteado-dente
     networks:
       - ms
     depends_on:

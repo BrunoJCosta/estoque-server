@@ -32,3 +32,8 @@ spring:
       hibernate:
         hbm2ddl:
           auto: update
+
+security:
+  jwt:
+    public-key: classpath:keys/public.pem
+    secret: "sa90q2jw89isdj9r832jf89ejw8rje98"

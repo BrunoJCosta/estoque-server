@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.io.Serial;
 
 @Entity
-@Table(name = "book", schema = "estoque")
+@Table(name = "book", schema = "estoque_server")
 @Getter
 class Book extends Template {
 

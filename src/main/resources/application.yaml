@@ -16,6 +16,7 @@ resilience4j:
 spring:
   application:
     name: estoque-server
+
   datasource:
     url: jdbc:postgresql://${DATA_BASE}:${PORT_DB}/estoque_server
     username: postgres
@@ -23,7 +24,7 @@ spring:
 
   flyway:
     url: jdbc:postgresql://${DATA_BASE}:${PORT_DB}/estoque_server
-    schemas: estoque
+    schemas: estoque_server
     user: postgres
     password: postgres
     enabled: true
